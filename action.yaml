@@ -1,0 +1,66 @@
+name: 'dsmrt/release'
+description: 'A simple conventional commit tag and release action for Github Actions'
+inputs:
+  package-files:
+    description: 'File to increment version.'
+    required: true
+    default: 'package.json'
+  tag-prefix:
+    description: 'Git tag prefix. Default is `v`'
+    default: 'v'
+outputs:
+  version:
+    description: "version without prefix"
+    value: ${{ steps.version.outputs.version }}
+  tag_version:
+    description: "tagged fulled version"
+    value: ${{ steps.version.outputs.version }}
+  major:
+    description: "major version"
+    value: ${{ steps.version.outputs.major }}
+  minor:
+    description: "minor version"
+    value: ${{ steps.version.outputs.minor }}
+  patch:
+    description: "patch version"
+    value: ${{ steps.version.outputs.patch }}
+runs:
+  using: "composite"
+  steps:
+    - name: node
+      uses: actions/setup-node@v4
+      with:
+        node-version: 20
+    - name: Setup Git Users
+      shell: bash
+      run: |
+        git config user.name github-actions[bot]
+        git config user.email 41898282+github-actions[bot]@users.noreply.github.com
+    - name: Release & Version
+      id: version
+      shell: bash
+      env:
+        PREFIX: ${{ inputs.tag-prefix }}
+      run: |
+        npx commit-and-tag-version@^12.0.0 --packageFiles ${{ inputs.package-files }}
+        PREFIX_VERSION=$(git tag | sort -V | tail -1)
+        VERSION=${PREFIX_VERSION#"$PREFIX"}
+        MAJOR=${VERSION%.*.*}
+        MINOR_PATCH=${VERSION#*.}
+        MINOR=${MINOR_PATCH%.*}
+        PATCH=${MINOR_PATCH#*.}
+
+        echo "version=${VERSION}"
+        echo "tag_version=$PREFIX_VERSION"
+        echo "major=$MAJOR"
+        echo "minor=$MINOR"
+        echo "patch=$PATCH"
+
+        echo "version=${VERSION}" >> $GITHUB_OUTPUTS
+        echo "tag_version=$PREFIX_VERSION" >> $GITHUB_OUTPUTS
+        echo "major=$MAJOR" >> $GITHUB_OUTPUTS
+        echo "minor=$MINOR" >> $GITHUB_OUTPUTS
+        echo "patch=$PATCH" >> $GITHUB_OUTPUTS
+        git tag -f "$PREFIX$MAJOR"
+        git push
+        git push --tags
