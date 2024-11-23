@@ -1,7 +1,7 @@
 name: 'dsmrt/release'
 description: 'A simple conventional commit tag and release action for Github Actions'
 inputs:
-  package-files:
+  package-file:
     description: 'File to increment version.'
     required: true
     default: 'package.json'
@@ -42,25 +42,25 @@ runs:
       env:
         PREFIX: ${{ inputs.tag-prefix }}
       run: |
-        npx commit-and-tag-version@^12.0.0 --packageFiles ${{ inputs.package-files }}
-        PREFIX_VERSION=$(git tag | sort -V | tail -1)
-        VERSION=${PREFIX_VERSION#"$PREFIX"}
-        MAJOR=${VERSION%.*.*}
-        MINOR_PATCH=${VERSION#*.}
-        MINOR=${MINOR_PATCH%.*}
-        PATCH=${MINOR_PATCH#*.}
-
-        echo "version=${VERSION}"
-        echo "tag_version=$PREFIX_VERSION"
-        echo "major=$MAJOR"
-        echo "minor=$MINOR"
-        echo "patch=$PATCH"
-
-        echo "version=${VERSION}" >> $GITHUB_OUTPUTS
-        echo "tag_version=$PREFIX_VERSION" >> $GITHUB_OUTPUTS
-        echo "major=$MAJOR" >> $GITHUB_OUTPUTS
-        echo "minor=$MINOR" >> $GITHUB_OUTPUTS
-        echo "patch=$PATCH" >> $GITHUB_OUTPUTS
-        git tag -f "$PREFIX$MAJOR"
-        git push
-        git push --tags
+        npx commit-and-tag-version@^12.0.0 --packageFiles ${{ inputs.package-file }}
+        # PREFIX_VERSION=$(git tag | sort -V | tail -1)
+        # VERSION=${PREFIX_VERSION#"$PREFIX"}
+        # MAJOR=${VERSION%.*.*}
+        # MINOR_PATCH=${VERSION#*.}
+        # MINOR=${MINOR_PATCH%.*}
+        # PATCH=${MINOR_PATCH#*.}
+        #
+        # echo "version=${VERSION}"
+        # echo "tag_version=$PREFIX_VERSION"
+        # echo "major=$MAJOR"
+        # echo "minor=$MINOR"
+        # echo "patch=$PATCH"
+        #
+        # echo "version=${VERSION}" >> $GITHUB_OUTPUTS
+        # echo "tag_version=$PREFIX_VERSION" >> $GITHUB_OUTPUTS
+        # echo "major=$MAJOR" >> $GITHUB_OUTPUTS
+        # echo "minor=$MINOR" >> $GITHUB_OUTPUTS
+        # echo "patch=$PATCH" >> $GITHUB_OUTPUTS
+        # git tag -f "$PREFIX$MAJOR"
+        # git push
+        # git push --tags
